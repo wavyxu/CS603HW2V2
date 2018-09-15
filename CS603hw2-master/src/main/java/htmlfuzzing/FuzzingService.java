@@ -6,19 +6,20 @@ import java.util.*;
 public class FuzzingService {
     private static FuzzingService service;
     private ServiceLoader<Fuzzer> loader;
-    private List<String> services;
+    private List<Fuzzer> services;
 
     private FuzzingService() {
 
         loader = ServiceLoader.load(Fuzzer.class);
         services = new ArrayList<>();
+        loadServices();
 
     }
 
     private void loadServices() {
-        while (loader.iterator().hasNext()) {
-            System.out.println(loader.iterator().next().toString());
-            services.add(loader.iterator().next().toString());
+        Iterator<Fuzzer> iter = loader.iterator();
+        while (iter.hasNext()) {
+            services.add(iter);
         }
     }
 
@@ -29,33 +30,16 @@ public class FuzzingService {
         return service;
     }
 
-    private Fuzzer getTagInserter(){
-//        for (String s : services) {
-//            if (s.equals("htmlfuzzing.ScriptTagInserter")) {
-//                return
-//            }
-//        }
-        for (Fuzzer fu : loader) {
-           if (fu.getClass().getName().equals("htmlfuzzing.ScriptTagInserter"))
-               return fu;
-        }
-        return null;
-    }
-
     private Fuzzer getTagRemover(){
-        for (Fuzzer fu : loader) {
-            if (fu.getClass().getName().equals("htmlfuzzing.TagRemover"))
-                return fu;
-        }
-        return null;
+        return services.get(0);
     }
 
     private Fuzzer getTagReplacer(){
-        for (Fuzzer fu : loader) {
-            if (fu.getClass().getName().equals("htmlfuzzing.TagReplacer"))
-                return fu;
-        }
-        return null;
+        return services.get(1);
+    }
+
+    private Fuzzer getTagInserter(){
+        return services.get(2);
     }
 
     public void singleModification(String htmlstr){
